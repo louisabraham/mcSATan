@@ -88,7 +88,7 @@ class Trail():
         return self.reason[lit.atom]
 
     def topLiterals(self, clause):
-        assert isinstance(clause, Types.Clause)
+        # assert isinstance(clause, Types.Clause)
         logger.debug(
             'topLiterals:\n'
             '\tclause: %s\n', clause)
@@ -101,10 +101,29 @@ class Trail():
             'can_backtrack_with:\n'
             '\tclause: %s\n', clause
         )
-        top = self.topLiterals(clause)
-        # logger.debug(top, self.lit_lvl(top[0]), [self.reason[lit.atom] == 'semantic evaluation' for lit in top])
-        return len(top) == 1 and self.lit_lvl(top[0]) > 0 or all(self.lit_reason(lit) == 'semantic evaluation' for lit in top)
-
+        # equivalent but less efficient:
+        # top = self.topLiterals(clause)
+        # return len(top) == 1 and self.lit_lvl(top[0]) > 0 or all(self.lit_reason(lit) == 'semantic evaluation' for lit in top)
+        
+        maxlvl = -1
+        uip = True
+        semeval = True
+        for lit in clause:
+            lvl = self.lit_lvl(lit)
+            if lvl > maxlvl:
+                maxlvl = lvl
+                uip = True
+                if semeval:
+                    semeval = self.lit_reason(lit) == 'semantic evaluation'
+            elif lvl  == maxlvl:
+                uip = False
+                if semeval:
+                    semeval = self.lit_reason(lit) == 'semantic evaluation'
+        return uip and maxlvl > 0 or semeval
+                
+        
+        
+        
     def backtrack_lvl_type(self, clause):
         assert all(isinstance(lit, Types.Literal) for lit in clause)
         top = self.topLiterals(clause)
@@ -215,9 +234,9 @@ class Solver():
                 self.propagate()
             except Conflict as conflict:
                 # return conflict
-                if logger.isEnabledFor(logger.INFO):
-                    logger.info('TRAIL:\n%s\n',
-                                logger.pformat({var: (self.trail.values[var], self.trail.lvl[var]) for var in self.trail.values}))
+                # if logger.isEnabledFor(logger.INFO):
+                #     logger.info('TRAIL:\n%s\n',
+                #                 logger.pformat({var: (self.trail.values[var], self.trail.lvl[var]) for var in self.trail.values}))
                 logger.info('CONFLICT\n'
                             '\tconflict: %s\n',
                             conflict)
@@ -234,9 +253,9 @@ class Solver():
                 else:
                     self.trail.backtrack_with(analyzed_conflict)
             else:
-                if logger.isEnabledFor(logger.INFO):                
-                    logger.info('TRAIL:\n%s\n',
-                                logger.pformat({var: (self.trail.values[var], self.trail.lvl[var]) for var in self.trail.values}))
+                # if logger.isEnabledFor(logger.INFO):
+                #     logger.info('TRAIL:\n%s\n',
+                #                 logger.pformat({var: (self.trail.values[var], self.trail.lvl[var]) for var in self.trail.values}))
                 if not self.variables.can_decide():
                     print('SAT')
                     return self.trail.values
