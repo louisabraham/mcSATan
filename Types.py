@@ -1,5 +1,7 @@
 from collections import namedtuple
 from copy import deepcopy
+from itertools import chain
+
 from priority_queue import MaxPriorityQ
 from watches import Watches
 import logger
@@ -59,7 +61,11 @@ class Clause(tuple):
     """
 
     def __new__(cls, *args):
-        return super().__new__(cls, sorted(set(args)))
+        return super().__new__(cls, args)
+
+    @staticmethod
+    def make_clause(*args):
+        return Clause(*sorted(set(args)))
 
     # def vars(self):
     #     return set.union(x.vars() for x in self)
@@ -69,11 +75,44 @@ class Clause(tuple):
 
     @staticmethod
     def resolveB(clause1, clause2, lit):
-        c1 = list(clause1)
-        c2 = list(clause2)
-        c1.remove(lit)
-        c2.remove(lit.neg)
-        ans = Clause(*(c1 + c2))
+        
+        # unuseful optimization (by merging)
+        # clause = []
+        # i = j = 0
+        # while i < len(clause1) or j < len(clause2):
+        #     if i == len(clause1):
+        #         llit = clause2[j]
+        #         if llit != lit and llit != lit.neg:
+        #             clause.append(llit)
+        #         j += 1
+        #     elif j == len(clause2):
+        #         llit = clause1[i]
+        #         if llit != lit and llit != lit.neg:
+        #             clause.append(llit)
+        #         i += 1
+        #     else:
+        #         lit1, lit2 = clause1[i], clause2[j]
+        #         if lit1 < lit2:
+        #             if lit1 != lit and lit1 != lit.neg:
+        #                 clause.append(lit1)
+        #             i += 1
+        #         elif lit2 < lit1:
+        #             if lit2 != lit and lit2 != lit.neg:
+        #                 clause.append(lit2)
+        #             j += 1
+        #         else:
+        #             if lit1 != lit and lit1 != lit.neg:
+        #                 clause.append(lit1)
+        #             i += 1
+        #             j += 1
+        # ans = Clause(*clause)
+        
+        clause = list(clause1 + clause2)
+        clause.remove(lit)
+        clause.remove(lit.neg)
+        ans = Clause.make_clause(*clause)
+        
+        
         logger.debug('resolveB:\n'
                      '\tclause1: %s\n'
                      '\tclause2: %s\n'
@@ -112,7 +151,7 @@ class ClauseDB():
         the literal that makes them unit
         """
         yield from self.watches.units()
-    
+
     def unsat_clauses(self):
         yield from self.watches.zeros()
 
