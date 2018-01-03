@@ -35,7 +35,7 @@ class Trail():
             '\tkey: %s\n'
             '\tvalue: %s\n', key, val)
         if key in self.values:
-            raise Error            
+            raise Error
             # if self.values[key] == val:
             #     logger.warning('Already set %s = %s', key, val)
             #     return
@@ -113,7 +113,7 @@ class Trail():
             # (unique implication point)
             return max((self.lit_lvl(i) for i in clause
                         if not i in top),
-                       default=-1), 'UIP'
+                       default=0), 'UIP'
         else:
             # it must be a semantic split clause
             assert all(self.reason[lit.atom] == 'semantic evaluation')
@@ -121,13 +121,14 @@ class Trail():
 
     def backtrack_with(self, clause):
         lvl, type = self.backtrack_lvl_type(clause)
-        logger.debug('backtrack_with: \n'
+        logger.info('backtrack_with: \n'
                      '\tclause %s\n'
                      '\tlvl %s \n'
                      '\ttype %s\n',
                      clause, lvl, type)
+        self.level = lvl
         for key in list(self.values):
-            if self.lvl[key] > lvl:
+            if self.lvl[key] > self.level:
                 del self.values[key]
                 del self.reason[key]
                 del self.lvl[key]
@@ -186,6 +187,10 @@ class Solver():
         return clause
 
     def clausal_propagate(self):
+        try:
+            raise Conflict(next(self.clauses.unsat_clauses()))
+        except StopIteration:
+            pass
         unit_clauses = list(self.clauses.unit_clauses())
         for clause, lit in unit_clauses:
             assert isinstance(clause, Types.Clause) and isinstance(
@@ -210,8 +215,8 @@ class Solver():
                 self.propagate()
             except Conflict as conflict:
                 # return conflict
-                logger.info('TRAIL: %s\n',
-                            logger.pformat(self.trail.values))
+                logger.info('TRAIL:\n%s\n',
+                            logger.pformat({var: (self.trail.values[var], self.trail.lvl[var]) for var in self.trail.values}))
                 logger.info('CONFLICT\n'
                             '\tconflict: %s\n',
                             conflict)
