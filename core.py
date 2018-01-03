@@ -1,7 +1,7 @@
 import Types
 import logger
 
-# TODO: clean assign / assign_atom
+# TODO: retrieve elements from trail by level
 
 
 class Conflict(Exception):

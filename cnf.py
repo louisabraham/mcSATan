@@ -1,4 +1,4 @@
-#!/usr/local/bin/pypy3
+# !/usr/local/bin/pypy3
 
 import fileinput
 
