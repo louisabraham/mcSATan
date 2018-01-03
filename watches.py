@@ -22,10 +22,11 @@ class Watches():
     You can retrieve all the unit watchlists with their only unit term.
 
     For convenience, you retrieve directly the element and not its watchlist
-    
+
     The watchlists are hashed, that allows *slightly* better performances
     if multiple elements have the same watchlists.
     """
+
     def __init__(self):
         # dict of watchlists to total of their values
         self.total = dict()
