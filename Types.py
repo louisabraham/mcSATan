@@ -61,11 +61,7 @@ class Clause(tuple):
     """
 
     def __new__(cls, *args):
-        return super().__new__(cls, args)
-
-    @staticmethod
-    def make_clause(*args):
-        return Clause(*sorted(set(args)))
+        return super().__new__(cls, sorted(set(args)))
 
     # def vars(self):
     #     return set.union(x.vars() for x in self)
@@ -110,7 +106,7 @@ class Clause(tuple):
         clause = list(clause1 + clause2)
         clause.remove(lit)
         clause.remove(lit.neg)
-        ans = Clause.make_clause(*clause)
+        ans = Clause(*clause)
         
         
         logger.debug('resolveB:\n'
