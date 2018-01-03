@@ -58,13 +58,9 @@ class Trail():
             "clausal_propagate\n"
             "\tclause: %s\n"
             "\tlit: %s\n", clause, lit)
-        assert isinstance(clause, Types.Clause)
-        # if isinstance(lit, Var):
-        #     key = lit
-        assert isinstance(lit, Types.Literal)
+        # assert isinstance(clause, Types.Clause)
+        # assert isinstance(lit, Types.Literal)
         key, val = lit.atom, lit.bool
-        # if isinstance(key, BooleanAtom):
-        #     key = key.var
         reason = ('clausal propagation', clause)
         if key in self.values:
             if self.values[key] == val:
@@ -104,7 +100,7 @@ class Trail():
         # equivalent but less efficient:
         # top = self.topLiterals(clause)
         # return len(top) == 1 and self.lit_lvl(top[0]) > 0 or all(self.lit_reason(lit) == 'semantic evaluation' for lit in top)
-        
+
         maxlvl = -1
         uip = True
         semeval = True
@@ -115,15 +111,12 @@ class Trail():
                 uip = True
                 if semeval:
                     semeval = self.lit_reason(lit) == 'semantic evaluation'
-            elif lvl  == maxlvl:
+            elif lvl == maxlvl:
                 uip = False
                 if semeval:
                     semeval = self.lit_reason(lit) == 'semantic evaluation'
         return uip and maxlvl > 0 or semeval
-                
-        
-        
-        
+
     def backtrack_lvl_type(self, clause):
         assert all(isinstance(lit, Types.Literal) for lit in clause)
         top = self.topLiterals(clause)
@@ -141,10 +134,10 @@ class Trail():
     def backtrack_with(self, clause):
         lvl, type = self.backtrack_lvl_type(clause)
         logger.info('backtrack_with: \n'
-                     '\tclause %s\n'
-                     '\tlvl %s \n'
-                     '\ttype %s\n',
-                     clause, lvl, type)
+                    '\tclause %s\n'
+                    '\tlvl %s \n'
+                    '\ttype %s\n',
+                    clause, lvl, type)
         self.level = lvl
         for key in list(self.values):
             if self.lvl[key] > self.level:
