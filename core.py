@@ -215,8 +215,9 @@ class Solver():
                 self.propagate()
             except Conflict as conflict:
                 # return conflict
-                logger.info('TRAIL:\n%s\n',
-                            logger.pformat({var: (self.trail.values[var], self.trail.lvl[var]) for var in self.trail.values}))
+                if logger.isEnabledFor(logger.INFO):
+                    logger.info('TRAIL:\n%s\n',
+                                logger.pformat({var: (self.trail.values[var], self.trail.lvl[var]) for var in self.trail.values}))
                 logger.info('CONFLICT\n'
                             '\tconflict: %s\n',
                             conflict)
@@ -233,8 +234,9 @@ class Solver():
                 else:
                     self.trail.backtrack_with(analyzed_conflict)
             else:
-                logger.info('TRAIL: %s\n',
-                            logger.pformat(self.trail.values))
+                if logger.isEnabledFor(logger.INFO):                
+                    logger.info('TRAIL:\n%s\n',
+                                logger.pformat({var: (self.trail.values[var], self.trail.lvl[var]) for var in self.trail.values}))
                 if not self.variables.can_decide():
                     print('SAT')
                     return self.trail.values
