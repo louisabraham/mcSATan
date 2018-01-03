@@ -112,6 +112,9 @@ class ClauseDB():
         the literal that makes them unit
         """
         yield from self.watches.units()
+    
+    def unsat_clauses(self):
+        yield from self.watches.zeros()
 
     def assign_atom(self, atom, val):
         self.watches.set(Literal(atom, val), 2)

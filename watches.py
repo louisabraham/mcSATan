@@ -91,6 +91,15 @@ class Watches():
             for elem in self.elems[wl]:
                 yield elem, var
 
+    def zeros(self):
+        """
+        returns the watched elements
+        """
+        for wl in self.lists[0]:
+            for elem in self.elems[wl]:
+                yield elem
+    
+
     def __repr__(self):
         ans = 'Watches\n'
         for wl, elems in self.elems.items():
