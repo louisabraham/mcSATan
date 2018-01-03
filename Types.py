@@ -61,11 +61,11 @@ class Clause(tuple):
     def __new__(cls, *args):
         return super().__new__(cls, sorted(set(args)))
 
-    def vars(self):
-        return set.union(x.vars() for x in self)
+    # def vars(self):
+    #     return set.union(x.vars() for x in self)
 
     def watches(self):
-        return self  # [lit.atom for lit in self]
+        return self
 
     @staticmethod
     def resolveB(clause1, clause2, lit):
@@ -96,11 +96,14 @@ class ClauseDB():
         # Literal assigned to False -> 0
         # Literal not assigned -> 1
         # Literal assigned to True -> 2
-        # This way, the clause is unit iff
-        # its total is 1
+        # This way, a clause is unit iff its total is 1
         self.watches = Watches()
 
     def add(self, clause):
+        """
+        Add the clause to the database,
+        and watches all its literals
+        """
         self.watches.add_watch(clause)
 
     def unit_clauses(self):
@@ -143,7 +146,6 @@ class VarDB():
             priority = self.priority_from_type[var.type]
         self.pq.push(var, priority)
 
-    
     def assign(self, var):
         self.pq.remove(var)
         self.watches.set(var, 0)
@@ -152,7 +154,6 @@ class VarDB():
         priority = self.priority_from_type[var.type]
         self.pq.push(var, priority)
         self.watches.set(var, 1)
-
 
     def pop(self):
         return self.pq.pop()

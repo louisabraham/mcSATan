@@ -3,6 +3,7 @@ import logger
 
 # TODO: clean assign / assign_atom
 
+
 class Conflict(Exception):
 
     def __init__(self, clause):
@@ -27,7 +28,6 @@ class Trail():
 
     def has_value(self, key):
         return key in self.values and self.values[key] is not None
-
 
     def decide(self, key, val):
         logger.debug(
@@ -213,8 +213,9 @@ class Solver():
                 logger.info('CONFLICT\n'
                             '\tconflict: %s\n',
                             conflict)
-                
-                analyzed_conflict = self.trail.analyse_conflict(conflict.clause)
+
+                analyzed_conflict = self.trail.analyse_conflict(
+                    conflict.clause)
                 logger.info('CONFLICT\n'
                             '\tconflict: %s\n'
                             '\tanalyzed conflict: %s\n',
@@ -233,23 +234,3 @@ class Solver():
                     var = self.variables.pop()
                     logger.info('DECiDE %s\n', var)
                     self.trail.decide(var, var.decide())
-
-
-s = Solver()
-x = s.BoolVar('x')
-y = s.BoolVar('y')
-
-lit1 = s.Literal(x, True)
-lit2 = s.Literal(y, True)
-clause = s.Clause(lit1, lit2)
-
-lit1 = s.Literal(x, False)
-lit2 = s.Literal(y, False)
-clause = s.Clause(lit1, lit2)
-
-# var = s.variables.pop()
-# s.trail.decide(var, var.decide())
-# w = s.clauses.watches
-c = s.solve()
-# s.clausal_propagate()
-# s.semantic_propagate()

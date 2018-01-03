@@ -1,7 +1,7 @@
 from collections import namedtuple
 from abc import ABC
 from operator import lt, le
-from types import Atom
+from Types import Atom
 
 # TODO: use tuples for RationalCombination
 
