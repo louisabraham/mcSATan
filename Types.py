@@ -3,7 +3,7 @@ from copy import deepcopy
 from itertools import chain
 
 from priority_queue import MaxPriorityQ
-from watches import Watches
+from watches import Watches, WatchesNP
 import logger
 
 
