@@ -35,11 +35,12 @@ class Trail():
             '\tkey: %s\n'
             '\tvalue: %s\n', key, val)
         if key in self.values:
-            if self.values[key] == val:
-                logger.warning('Already set %s = %s', key, val)
-                return
-            else:
-                raise Conflict(reason)
+            raise Error            
+            # if self.values[key] == val:
+            #     logger.warning('Already set %s = %s', key, val)
+            #     return
+            # else:
+            #     raise Conflict(reason)
         self.level += 1
         # no need to remove the variable
         # we assume it has been popped
@@ -105,13 +106,13 @@ class Trail():
         return len(top) == 1 and self.lit_lvl(top[0]) > 0 or all(self.lit_reason(lit) == 'semantic evaluation' for lit in top)
 
     def backtrack_lvl_type(self, clause):
+        assert all(isinstance(lit, Types.Literal) for lit in clause)
         top = self.topLiterals(clause)
         if len(top) == 1:
             # The clause is an UIP
             # (unique implication point)
-            return max((i for i in clause
+            return max((self.lit_lvl(i) for i in clause
                         if not i in top),
-                       key=self.lit_lvl,
                        default=-1), 'UIP'
         else:
             # it must be a semantic split clause
@@ -209,7 +210,8 @@ class Solver():
                 self.propagate()
             except Conflict as conflict:
                 # return conflict
-                logger.info('TRAIL: %s\n', logger.pformat(self.trail.values))
+                logger.info('TRAIL: %s\n',
+                            logger.pformat(self.trail.values))
                 logger.info('CONFLICT\n'
                             '\tconflict: %s\n',
                             conflict)
@@ -226,7 +228,8 @@ class Solver():
                 else:
                     self.trail.backtrack_with(analyzed_conflict)
             else:
-                logger.info('TRAIL: %s\n', logger.pformat(self.trail.values))
+                logger.info('TRAIL: %s\n',
+                            logger.pformat(self.trail.values))
                 if not self.variables.can_decide():
                     print('SAT')
                     return self.trail.values
