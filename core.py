@@ -79,7 +79,7 @@ class Trail():
         self.lvl[key] = self.level
 
     def lit_lvl(self, lit):
-        assert isinstance(lit, Types.Literal)
+        # assert isinstance(lit, Types.Literal)
         # logger.debug('lit_lvl\n\tlit: %s \n', lit)
         return self.lvl[lit.atom]
 
