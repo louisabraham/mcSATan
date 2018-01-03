@@ -1,6 +1,16 @@
-# !/usr/local/bin/pypy3
+#!/usr/bin/env python3
+
+
+"""
+A DIMACS SAT-Solver based on mcSAT
+"""
+
 
 import fileinput
+from time import time
+from sys import stderr
+
+dbt = time()
 
 from core import Solver
 buf = []
@@ -29,4 +39,7 @@ for line in fileinput.input():
     solver.Clause(*[solver.Literal(variables[abs(i)], i > 0)
                     for i in line[:-1]])
 
+print('Parsed %.02fs' % (time() - dbt), file=stderr)
+dbt = time()
 solver.solve()
+print('Solved %.02fs' % (time() - dbt), file=stderr)
