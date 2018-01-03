@@ -16,6 +16,16 @@ import logger
 #         default = State([1] * len(State._fields))
 
 class Watches():
+    """
+    Allow to set watchlists, aka lists of variables with memoized total.
+    Modify values of variables and the totals will be updated.
+    You can retrieve all the unit watchlists with their only unit term.
+
+    For convenience, you retrieve directly the element and not its watchlist
+    
+    The watchlists are hashed, that allows *slightly* better performances
+    if multiple elements have the same watchlists.
+    """
     def __init__(self):
         # dict of watchlists to total of their values
         self.total = dict()
@@ -32,7 +42,7 @@ class Watches():
     def add_watch(self, elem, wl=None):
         """
         new values default to True
-        elem.watches() must be defined and hashable
+        calls elem.watches() if wl is None
         """
         if wl is None:
             wl = elem.watches()
@@ -50,6 +60,10 @@ class Watches():
             self.lists[tot].add(wl)
 
     def set(self, var, val):
+        """
+        change the value of var to val
+        and update the concerned totals
+        """
         if self.values[var] == val:
             return
         for wl in self.in_watch[var]:
@@ -67,9 +81,8 @@ class Watches():
 
     def units(self):
         """
-        returns all the watched elements
-        with the only variable in they watchlist
-        with the value 1
+        returns the watched elements and the only
+        unit variable in their watchlist
         """
         for wl in self.lists[1]:
             var = next(v for v in wl if self.values[v])
