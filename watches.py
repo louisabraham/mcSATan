@@ -97,7 +97,6 @@ class Watches():
         """
         for wl in self.lists[0]:
             yield from self.elems[wl]
-    
 
     def __repr__(self):
         ans = 'Watches\n'
@@ -109,7 +108,9 @@ class Watches():
             ans += '\t\tvalues: %s\n' % [self.values[w] for w in wl]
         return ans + '\n'
 
+
 import numpy as np
+
 
 class WatchesNP():
     """
@@ -126,7 +127,7 @@ class WatchesNP():
 
     def __init__(self):
         # lines are var, columns are wl
-        self.matrix = np.zeros(shape=(0,0))
+        self.matrix = np.zeros(shape=(0, 0))
         # values of the variables
         self.values = np.zeros(shape=(0,))
         # sum of values of a wl
@@ -135,7 +136,7 @@ class WatchesNP():
         self.id_to_var = dict()
         self.wl_to_id = dict()
         # self.id_to_wl = dict()
-        
+
         # elements associated with a wl
         self.elems = defaultdict(set)
 
@@ -150,8 +151,8 @@ class WatchesNP():
         logger.debug('add_watch:\n'
                      '\telem: %s\n'
                      '\twl: %s\n',
-                     elem, wl)        
-            
+                     elem, wl)
+
         if wl not in self.wl_to_id:
             # add the ids
             self.wl_to_id[wl] = wl_id = len(self.wl_to_id)
@@ -161,7 +162,7 @@ class WatchesNP():
                     self.var_to_id[var] = var_id = len(self.var_to_id)
                     self.id_to_var[var_id] = var
                     newVar += 1
-            
+
             # add lines
             nl, nc = self.matrix.shape
             newvars = np.zeros(shape=(newVar, nc))
@@ -169,19 +170,19 @@ class WatchesNP():
             # add variables
             if newVar:
                 self.values = np.append(self.values, np.ones(shape=(newVar,)))
-            
+
             # add column
             newCol = np.zeros(shape=(nl + newVar, 1))
             for var in wl:
                 newCol[self.var_to_id[var]] = 1
             self.matrix = np.append(self.matrix, newCol, axis=1)
-            
+
             # add total
-            self.total = np.append(self.total, [sum(self.matrix[:, -1] * self.values)])
-            
+            self.total = np.append(
+                self.total, [sum(self.matrix[:, -1] * self.values)])
+
         self.elems[wl_id].add(elem)
-        
-            
+
     def set(self, var, val):
         """
         change the value of var to val
@@ -214,7 +215,6 @@ class WatchesNP():
         """
         for wl_id in np.where(self.total == 0)[0]:
             yield from self.elems[wl_id]
-    
 
     def __repr__(self):
         ans = 'Watches\n'
@@ -225,6 +225,8 @@ class WatchesNP():
             ans += '\t\ttotal: %s\n' % self.total
             ans += '\t\tvalues: %s\n' % [self.values[w] for w in wl]
         return ans + '\n'
+
+
 w = WatchesNP()
-w.add_watch('z','xy')
-w.add_watch('a','x')
+w.add_watch('z', 'xy')
+w.add_watch('a', 'x')
