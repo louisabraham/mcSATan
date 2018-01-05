@@ -1,7 +1,9 @@
+from collections import defaultdict
+
 import Types
 import logger
-
 # TODO: retrieve elements from trail by level
+# TODO: strange, where do I learn clauses?
 
 
 class Conflict(Exception):
@@ -18,7 +20,8 @@ class Trail():
     Stores the values of atoms with levels
     """
 
-    def __init__(self, variables, clauses):
+    def __init__(self, variables, clauses, stats):
+        self.stats = stats
         self.variables = variables
         self.clauses = clauses
         self.values = {}
@@ -58,6 +61,7 @@ class Trail():
             "clausal_propagate\n"
             "\tclause: %s\n"
             "\tlit: %s\n", clause, lit)
+        self.stats.nb_clausal_propagations += 1
         # assert isinstance(clause, Types.Clause)
         # assert isinstance(lit, Types.Literal)
         key, val = lit.atom, lit.bool
@@ -160,6 +164,7 @@ class Trail():
             assert False
 
     def analyse_conflict(self, clause):
+        # TODO: optimize this part
         assert isinstance(clause, Types.Clause)
         while clause and not self.can_backtrack_with(clause):
             for lit in clause:
@@ -170,14 +175,32 @@ class Trail():
         return clause
 
 
+class SolverStats(dict):
+    def __getitem__(self, key):
+        if not key in self:
+            self[key] = 0
+        return super().__getitem__(key)
+
+    def __getattr__(self, key):
+        try:
+            return super().__getattr__(key)
+        except AttributeError:
+            return self[key]
+
+    def __setattr__(self, key, value):
+        self.__setitem__(key, value)
+
+
 class Solver():
 
     def __init__(self):
-        self.variables = Types.VarDB()
-        self.clauses = Types.ClauseDB()
-        self.trail = Trail(self.variables, self.clauses)
+        self.stats = SolverStats()
+        self.variables = Types.VarDB(self.stats)
+        self.clauses = Types.ClauseDB(self.stats)
+        self.trail = Trail(self.variables, self.clauses, self.stats)
 
     def BoolVar(self, *args, **kwargs):
+        self.stats.nb_vars += 1
         priority = kwargs.get('priority')
         try:
             del kwargs['priority']
@@ -194,6 +217,7 @@ class Solver():
         return lit
 
     def Clause(self, *args, **kwargs):
+        self.stats.nb_clauses += 1
         clause = Types.Clause(*args, **kwargs)
         self.clauses.add(clause)
         return clause
@@ -213,8 +237,8 @@ class Solver():
     def semantic_propagate(self):
         units = list(self.variables.watches.units())
         for elem, var in units:
+            # elem.propagate is defined in plugins
             elem.propagate(self.trail, var)
-            # self.watches.switch_false(var)
         return units
 
     def propagate(self):
@@ -245,6 +269,9 @@ class Solver():
                     return False
                 else:
                     self.trail.backtrack_with(analyzed_conflict)
+                    # CDCL is happening here
+                    self.clauses.add(analyzed_conflict)
+                    self.stats.nb_learned_clauses += 1
             else:
                 # if logger.isEnabledFor(logger.INFO):
                 #     logger.info('TRAIL:\n%s\n',

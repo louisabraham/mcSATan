@@ -9,6 +9,7 @@ A DIMACS SAT-Solver based on mcSAT
 import fileinput
 from time import time
 from sys import stderr
+from pprint import pprint
 
 dbt = time()
 
@@ -42,4 +43,5 @@ for line in fileinput.input():
 print('Parsed %.02fs' % (time() - dbt), file=stderr)
 dbt = time()
 solver.solve()
+pprint(solver.stats)
 print('Solved %.02fs' % (time() - dbt), file=stderr)

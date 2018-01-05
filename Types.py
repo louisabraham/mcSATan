@@ -71,7 +71,7 @@ class Clause(tuple):
 
     @staticmethod
     def resolveB(clause1, clause2, lit):
-        
+
         # unuseful optimization (by merging)
         # clause = []
         # i = j = 0
@@ -102,13 +102,12 @@ class Clause(tuple):
         #             i += 1
         #             j += 1
         # ans = Clause(*clause)
-        
+
         clause = list(clause1 + clause2)
         clause.remove(lit)
         clause.remove(lit.neg)
         ans = Clause(*clause)
-        
-        
+
         logger.debug('resolveB:\n'
                      '\tclause1: %s\n'
                      '\tclause2: %s\n'
@@ -125,7 +124,8 @@ class ClauseDB():
     a compact representation of all the clauses in the system
     """
 
-    def __init__(self):
+    def __init__(self, stats):
+        self.stats = stats
         # this instances of Watches is unique for the
         # clausal propagations
         # Literal assigned to False -> 0
@@ -170,7 +170,8 @@ class VarDB():
 
     priority_from_type = {'Bool': 1, 'Rat': 2}
 
-    def __init__(self):
+    def __init__(self, stats):
+        self.stats = stats
         # Unused now, list of all variables
         self.vars = []
         # Semantic propagation
