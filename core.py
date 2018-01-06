@@ -2,8 +2,6 @@ from collections import defaultdict
 
 import Types
 import logger
-# TODO: retrieve elements from trail by level
-# TODO: strange, where do I learn clauses?
 
 
 class Conflict(Exception):
@@ -28,20 +26,26 @@ class Trail():
         self.reason = {}
         self.lvl = {}
         self.level = 0
+        self.at_lvl = defaultdict(list)
 
     def set_value(self, key, val, reason, lvl):
         self.values[key] = val
         self.reason[key] = reason
         self.lvl[key] = lvl
+        self.at_lvl[lvl].append(key)
         self.clauses.assign_atom(key, val)
         self.variables.assign(key)
 
-    def del_value(self, key):
-        del self.values[key]
-        del self.reason[key]
-        del self.lvl[key]
-        self.variables.desassign(key)
-        self.clauses.desassign_atom(key)
+    def del_values_at_lvl(self, lvl):
+        if lvl not in self.at_lvl:
+            return
+        for key in self.at_lvl[lvl]:
+            del self.values[key]
+            del self.reason[key]
+            del self.lvl[key]
+            self.variables.desassign(key)
+            self.clauses.desassign_atom(key)
+        del self.at_lvl[lvl]
 
     def has_value(self, key):
         return key in self.values
@@ -142,10 +146,9 @@ class Trail():
                     '\tlvl %s \n'
                     '\ttype %s\n',
                     clause, lvl, type)
+        for l in range(self.level, lvl, -1):
+            self.del_values_at_lvl(l)
         self.level = lvl
-        for key in list(self.values):
-            if self.lvl[key] > self.level:
-                self.del_value(key)
         if type == 'UIP':
             for lit in clause:
                 if not self.has_value(lit.atom):
