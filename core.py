@@ -36,6 +36,13 @@ class Trail():
         self.clauses.assign_atom(key, val)
         self.variables.assign(key)
 
+    def del_value(self, key):
+        del self.values[key]
+        del self.reason[key]
+        del self.lvl[key]
+        self.variables.desassign(key)
+        self.clauses.desassign_atom(key)
+
     def has_value(self, key):
         return key in self.values
 
@@ -44,13 +51,7 @@ class Trail():
             'decide\n'
             '\tkey: %s\n'
             '\tvalue: %s\n', key, val)
-        if key in self.values:
-            raise Error
-            # if self.values[key] == val:
-            #     logger.warning('Already set %s = %s', key, val)
-            #     return
-            # else:
-            #     raise Conflict(reason)
+        assert key not in self.values
         self.level += 1
         # no need to remove the variable
         # we assume it has been popped
@@ -144,11 +145,7 @@ class Trail():
         self.level = lvl
         for key in list(self.values):
             if self.lvl[key] > self.level:
-                del self.values[key]
-                del self.reason[key]
-                del self.lvl[key]
-                self.variables.desassign(key)
-                self.clauses.desassign_atom(key)
+                self.del_value(key)
         if type == 'UIP':
             for lit in clause:
                 if not self.has_value(lit.atom):
