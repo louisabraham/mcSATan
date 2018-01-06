@@ -29,6 +29,11 @@ class Trail():
         self.lvl = {}
         self.level = 0
 
+    def set_value(self, key, val, reason, lvl):
+        self.values[key] = val
+        self.reason[key] = reason
+        self.lvl[key] = lvl
+
     def has_value(self, key):
         return key in self.values and self.values[key] is not None
 
@@ -49,9 +54,7 @@ class Trail():
         # we assume it has been popped
         self.variables.assign(key)
         self.clauses.assign_atom(key, val)
-        self.values[key] = val
-        self.reason[key] = 'decide'
-        self.lvl[key] = self.level
+        self.set_value(var, val, 'decide', self.level)
 
     # def evals_to(self, key, val):
     #     self.set_element(key, val, self.level, reason='semantic evaluation')
@@ -74,9 +77,7 @@ class Trail():
                 raise Conflict(clause)
         self.clauses.assign_atom(key, val)
         self.variables.assign(key)
-        self.values[key] = val
-        self.reason[key] = reason
-        self.lvl[key] = self.level
+        self.set_value(key, val, reason, self.level)
 
     def lit_lvl(self, lit):
         # assert isinstance(lit, Types.Literal)
@@ -155,6 +156,7 @@ class Trail():
                 if not self.has_value(lit.atom):
                     self.clausal_propagate(clause, lit)
         elif type == 'semantic split':
+            # UNDO-DECIDE
             for lit in clause:
                 if not self.has_value(lit.atom):
                     self.variables.assign(lit.atom)
