@@ -33,9 +33,11 @@ class Trail():
         self.values[key] = val
         self.reason[key] = reason
         self.lvl[key] = lvl
+        self.clauses.assign_atom(key, val)
+        self.variables.assign(key)
 
     def has_value(self, key):
-        return key in self.values and self.values[key] is not None
+        return key in self.values
 
     def decide(self, key, val):
         logger.debug(
@@ -52,9 +54,7 @@ class Trail():
         self.level += 1
         # no need to remove the variable
         # we assume it has been popped
-        self.variables.assign(key)
-        self.clauses.assign_atom(key, val)
-        self.set_value(var, val, 'decide', self.level)
+        self.set_value(key, val, 'decide', self.level)
 
     # def evals_to(self, key, val):
     #     self.set_element(key, val, self.level, reason='semantic evaluation')
@@ -75,8 +75,6 @@ class Trail():
                 return
             else:
                 raise Conflict(clause)
-        self.clauses.assign_atom(key, val)
-        self.variables.assign(key)
         self.set_value(key, val, reason, self.level)
 
     def lit_lvl(self, lit):
