@@ -76,7 +76,7 @@ class Trail():
         reason = ('clausal propagation', clause)
         if key in self.values:
             if self.values[key] == val:
-                logger.warning('Already set %s = %s', key, val)
+                # logger.warning('Already set %s = %s', key, val)
                 return
             else:
                 raise Conflict(clause)
@@ -117,12 +117,10 @@ class Trail():
             if lvl > maxlvl:
                 maxlvl = lvl
                 uip = True
-                if semeval:
-                    semeval = self.lit_reason(lit) == 'semantic evaluation'
             elif lvl == maxlvl:
                 uip = False
-                if semeval:
-                    semeval = self.lit_reason(lit) == 'semantic evaluation'
+            if semeval:
+                semeval = self.lit_reason(lit) == 'semantic evaluation'
         return uip and maxlvl > 0 or semeval
 
     def backtrack_lvl_type(self, clause):
@@ -193,11 +191,13 @@ class SolverStats(dict):
 
 class Solver():
 
-    def __init__(self):
+    def __init__(self, CDCL=True):
         self.stats = SolverStats()
         self.variables = Types.VarDB(self.stats)
         self.clauses = Types.ClauseDB(self.stats)
         self.trail = Trail(self.variables, self.clauses, self.stats)
+
+        self.CDCL = CDCL
 
     def BoolVar(self, *args, **kwargs):
         self.stats.nb_vars += 1
@@ -229,8 +229,6 @@ class Solver():
             pass
         unit_clauses = list(self.clauses.unit_clauses())
         for clause, lit in unit_clauses:
-            assert isinstance(clause, Types.Clause) and isinstance(
-                lit, Types.Literal)
             self.trail.clausal_propagate(clause, lit)
         return unit_clauses
 
@@ -270,8 +268,9 @@ class Solver():
                 else:
                     self.trail.backtrack_with(analyzed_conflict)
                     # CDCL is happening here
-                    self.clauses.add(analyzed_conflict)
-                    self.stats.nb_learned_clauses += 1
+                    if self.CDCL:
+                        self.clauses.add(analyzed_conflict)
+                        self.stats.nb_learned_clauses += 1
             else:
                 # if logger.isEnabledFor(logger.INFO):
                 #     logger.info('TRAIL:\n%s\n',
