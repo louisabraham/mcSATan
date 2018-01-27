@@ -24,7 +24,7 @@ for line in fileinput.input():
         continue
     if line[0] == 'p':
         assert line[1] == 'cnf'
-        solver = Solver()
+        solver = Solver(CDCL=True)
         nVar = int(line[2])
         nClauses = int(line[3])
         variables = {i: solver.BoolVar('var%s' % i)
