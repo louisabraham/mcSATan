@@ -3,7 +3,7 @@ from copy import deepcopy
 from itertools import chain
 
 from priority_queue import MaxPriorityQ
-from watches import Watches, WatchesNP
+from watches import Watches
 import logger
 
 
@@ -146,7 +146,10 @@ class ClauseDB():
         return the unit clauses along with
         the literal that makes them unit
         """
-        yield from self.watches.units()
+        for clause, lit in self.watches.units():
+            assert isinstance(clause, Clause)
+            assert isinstance(lit, Literal)
+            yield clause, lit
 
     def unsat_clauses(self):
         yield from self.watches.zeros()
