@@ -3,18 +3,6 @@ from operator import add, sub
 import logger
 
 
-# def Watches(fields, default=None):
-#     """
-#     fields is a string with space-separated
-#     names of boolean / integer fields
-#     """
-#
-#     State = namedtuple('State', fields)
-#     State.__add__ = lambda a, b: State(*map(operator.add, a, b))
-#     State.__sub__ = lambda a, b: State(*map(operator.sub, a, b))
-#     if default is None:
-#         default = State([1] * len(State._fields))
-
 class Watches():
     """
     Allow to set watchlists, aka lists of variables with memoized total.
@@ -26,6 +14,8 @@ class Watches():
 
     The watchlists are hashed, that allows *slightly* better performances
     if multiple elements have the same watchlists.
+
+    TODO: handle tuples values (subclass)
     """
 
     def __init__(self):
@@ -109,11 +99,15 @@ class Watches():
         return ans + '\n'
 
 
-import numpy as np
+from random import shuffle
 
 
-class WatchesNP():
+class Watches2WL():
     """
+
+    Implementation of the watched literals from
+    http://matryoshka.gforge.inria.fr/pubs/sat_2wl_paper.pdf
+
     Allow to set watchlists, aka lists of variables with memoized total.
     Modify values of variables and the totals will be updated.
     You can retrieve all the unit watchlists with their only unit term.
@@ -123,22 +117,41 @@ class WatchesNP():
 
     The watchlists are hashed, that allows *slightly* better performances
     if multiple elements have the same watchlists.
+
+    TODO: handle single clauses, handle tuples in a nice way
     """
 
     def __init__(self):
-        # lines are var, columns are wl
-        self.matrix = np.zeros(shape=(0, 0))
+
         # values of the variables
-        self.values = np.zeros(shape=(0,))
-        # sum of values of a wl
-        self.total = np.zeros(shape=(0,))
-        self.var_to_id = dict()
-        self.id_to_var = dict()
-        self.wl_to_id = dict()
-        # self.id_to_wl = dict()
+        self.values = defaultdict(lambda: 1)
+        # in_watch[x] = list of watchlists containing x
+        self.in_watch = defaultdict(set)
+
+        # array of the watchlist
+        # watchlists are hashed
+        # but associated with an array
+        self.array = {}
 
         # elements associated with a wl
         self.elems = defaultdict(set)
+
+        self.unitswl = []
+        self.zeroswl = []
+
+    @staticmethod
+    def get_value(var):
+        x = self.values[var]
+        if isinstance(x, int):
+            return x
+        return x[0]
+
+    def swap2(self, l):
+        n = len(l)
+        i0 = max(range(n), key=self.values.__getitem__)
+        l[0], l[i0] = l[i0], l[0]
+        i1 = max(range(1, n), key=self.values.__getitem__)
+        l[1], l[i1] = l[i1], l[1]
 
     def add_watch(self, elem, wl=None):
         """
@@ -152,49 +165,35 @@ class WatchesNP():
                      '\telem: %s\n'
                      '\twl: %s\n',
                      elem, wl)
+        self.elems[wl].add(elem)
+        if not wl in self.array:
+            arr = self.array[wl] = list(wl)
+            self.swap2(arr)
+            self.handle(wl)
+            self.in_watch[arr[0]].add(wl)
+            self.in_watch[arr[1]].add(wl)
 
-        if wl not in self.wl_to_id:
-            # add the ids
-            self.wl_to_id[wl] = wl_id = len(self.wl_to_id)
-            newVar = 0
-            for var in wl:
-                if not var in self.var_to_id:
-                    self.var_to_id[var] = var_id = len(self.var_to_id)
-                    self.id_to_var[var_id] = var
-                    newVar += 1
-
-            # add lines
-            nl, nc = self.matrix.shape
-            newvars = np.zeros(shape=(newVar, nc))
-            self.matrix = np.append(self.matrix, newvars, axis=0)
-            # add variables
-            if newVar:
-                self.values = np.append(self.values, np.ones(shape=(newVar,)))
-
-            # add column
-            newCol = np.zeros(shape=(nl + newVar, 1))
-            for var in wl:
-                newCol[self.var_to_id[var]] = 1
-            self.matrix = np.append(self.matrix, newCol, axis=1)
-
-            # add total
-            self.total = np.append(
-                self.total, [sum(self.matrix[:, -1] * self.values)])
-
-        self.elems[wl_id].add(elem)
+    def handle(self, wl):
+        arr = self.array[wl]
+        val = self.get_value(arr[0]) + self.get_value(arr[1])
+        if val == 0:
+            self.zeroswl.append(wl)
+        if val == 1:
+            self.unitswl.append(wl)
 
     def set(self, var, val):
         """
         change the value of var to val
         and update the concerned totals
         """
-        var = self.var_to_id[var]
         if self.values[var] == val:
             return
-        self.total += (val - self.values[var]) * self.matrix[var]
-        self.values[var] = val
+        for wl in self.in_watch[var]:
+            arr = self.array[wl]
+            self.swap2(arr)
+            self.handle(wl)
         logger.debug('set\n'
-                     '\tmatrix: %s\n'
+                     '\twatches: %s\n'
                      '\tvar: %s\n'
                      '\tval: %s\n',
                      self, var, val)
@@ -204,17 +203,17 @@ class WatchesNP():
         returns the watched elements and the only
         unit variable in their watchlist
         """
-        for wl_id in np.where(self.total == 1)[0]:
-            var_id = np.argmax(self.matrix[:, wl_id] * self.values)
-            for elem in self.elems[wl_id]:
-                yield elem, self.id_to_var[var_id]
+        for wl in self.unitswl:
+            var = self.array[wl][0]
+            for elem in self.elems[wl]:
+                yield elem, var
 
     def zeros(self):
         """
         returns the watched elements
         """
-        for wl_id in np.where(self.total == 0)[0]:
-            yield from self.elems[wl_id]
+        for wl in self.zeroswl:
+            yield from self.elems[wl]
 
     def __repr__(self):
         ans = 'Watches\n'
@@ -227,6 +226,7 @@ class WatchesNP():
         return ans + '\n'
 
 
-w = WatchesNP()
-w.add_watch('z', 'xy')
-w.add_watch('a', 'x')
+if __name__ == '__main__':
+    w = Watches()
+    w.add_watch('z', 'xy')
+    w.add_watch('a', 'x')
