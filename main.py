@@ -1,4 +1,4 @@
-from LRA import *
+from lra import *
 from core import Solver
 
 # # var = s.variables.pop()

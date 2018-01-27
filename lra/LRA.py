@@ -3,7 +3,7 @@ from abc import ABC
 from operator import lt, le
 from Types import Atom
 
-# TODO: use tuples for RationalCombination
+# TODO: use tuples for RationalCombination?
 
 
 class RationalCombination(dict):
