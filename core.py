@@ -3,6 +3,10 @@ from collections import defaultdict
 import Types
 import logger
 
+"""
+TODO: put values as a field in variable class without name
+retrieve the variable from VarDB
+"""
 
 class Conflict(Exception):
 
@@ -70,8 +74,8 @@ class Trail():
             "\tclause: %s\n"
             "\tlit: %s\n", clause, lit)
         self.stats.nb_clausal_propagations += 1
-        # assert isinstance(clause, Types.Clause)
-        # assert isinstance(lit, Types.Literal)
+        assert isinstance(clause, Types.Clause)
+        assert isinstance(lit, Types.Literal)
         key, val = lit.atom, lit.bool
         reason = ('clausal propagation', clause)
         if key in self.values:
@@ -83,7 +87,7 @@ class Trail():
         self.set_value(key, val, reason, self.level)
 
     def lit_lvl(self, lit):
-        # assert isinstance(lit, Types.Literal)
+        assert isinstance(lit, Types.Literal)
         # logger.debug('lit_lvl\n\tlit: %s \n', lit)
         return self.lvl[lit.atom]
 
@@ -92,7 +96,7 @@ class Trail():
         return self.reason[lit.atom]
 
     def topLiterals(self, clause):
-        # assert isinstance(clause, Types.Clause)
+        assert isinstance(clause, Types.Clause)
         logger.debug(
             'topLiterals:\n'
             '\tclause: %s\n', clause)
