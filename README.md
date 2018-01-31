@@ -28,3 +28,4 @@ TODO
 -   SBR strategy for clause forget
 -   Luby's restart
 -   Plugin for LRA
+-   C implementation of 2WL
