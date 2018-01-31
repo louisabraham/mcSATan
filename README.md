@@ -28,5 +28,7 @@ TODO
 -   SBR strategy for clause forget
 -   Luby's restart
 -   Plugin for LRA
+-   Unit Tests
 -   C implementation of 2WL
 -   C implementation of dyadics for LRA
+-   SMT-LIB parser
