@@ -29,3 +29,4 @@ TODO
 -   Luby's restart
 -   Plugin for LRA
 -   C implementation of 2WL
+-   C implementation of dyadics for LRA
