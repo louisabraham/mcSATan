@@ -9,7 +9,10 @@ import argparse
 from time import time
 from sys import stderr, stdin, path
 from pprint import pprint
-import os.path
+
+from mcSATan.core import Solver
+from mcSATan.logger import logger
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument('infile', nargs='?', type=argparse.FileType('r'),
@@ -17,11 +20,6 @@ parser.add_argument('infile', nargs='?', type=argparse.FileType('r'),
 parser.add_argument('--debug', nargs='?', type=int, default=30)
 
 args = parser.parse_args()
-
-
-path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-from mcSATan.core import Solver
-from mcSATan.logger import logger
 
 dbt = time()
 
