@@ -23,7 +23,9 @@ You can also directly plug the output of
 TODO
 ====
 
+-   convert Watches to integers
 -   2WL watched literals
+-   config file
 -   ACIDS branching heuristic
 -   SBR strategy for clause forget
 -   Luby's restart
