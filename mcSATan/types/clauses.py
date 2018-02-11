@@ -36,7 +36,14 @@ class Clause(tuple):
     """
 
     def __new__(cls, *args):
-        return super().__new__(cls, sorted(set(args)))
+        seen = set()
+        ls = []
+        for e in args:
+            if not e in seen:
+                ls.append(e)
+                seen.add(e)
+        ls.sort()
+        return super().__new__(cls, ls)
 
     # def vars(self):
     #     return set.union(x.vars() for x in self)
