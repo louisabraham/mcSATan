@@ -34,7 +34,8 @@ class Clause(tuple):
     """
     Disjunction of literals
     """
-
+    # TODO: make unsafe clauses for analyse_conflict
+    # TODO: ensure clause does not contain a literal and its negation
     def __new__(cls, *args):
         seen = set()
         ls = []
