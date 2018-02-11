@@ -13,12 +13,12 @@ Usage
 
 You can use it to solve SAT problems with DIMACS-formatted `.cnf` files.
 
-    ./mc2 file.cnf
+    python3 -m mcSATan.cnf file.cnf
 
 You can also directly plug the output of
 [cnfgen](https://massimolauria.github.io/cnfgen/):
 
-    cnfgen php 6 8 | ./cnf.py
+    cnfgen php 6 8 | python3 -m mcSATan.cnf
 
 TODO
 ====
