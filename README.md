@@ -29,6 +29,7 @@ TODO
 -   ACIDS branching heuristic
 -   SBR strategy for clause forget
 -   Luby's restart
+-   setuptools
 -   Plugin for LRA
 -   Unit Tests
 -   C implementation of 2WL
