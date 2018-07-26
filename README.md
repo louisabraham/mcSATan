@@ -23,8 +23,13 @@ You can also directly plug the output of
 TODO
 ====
 
+-   add setup
+-   add tests with pytest
+-   deploy to travis
+-   convert to Cython
 -   convert Watches to integers
 -   2WL watched literals
+-   optimize the conflict analysis and the clause hashing
 -   config file
 -   ACIDS branching heuristic
 -   SBR strategy for clause forget
