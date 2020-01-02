@@ -32,6 +32,7 @@ TODO
 -   optimize the conflict analysis and the clause hashing
 -   config file
 -   ACIDS branching heuristic
+-   phase-saving
 -   SBR strategy for clause forget
 -   Luby's restart
 -   setuptools
