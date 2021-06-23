@@ -1,6 +1,9 @@
 .ipynb_checkpoints
 .DS_Store
 __pycache__
+.eggs
+.pytest_cache
+*.egg-info
 _build
 build
 /dist
